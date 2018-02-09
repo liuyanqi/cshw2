@@ -10,7 +10,7 @@ def train_error(dataset):
         For a dataset with two classes:
         C(p) = min{p, 1-p}
     '''
-    predict_true = len(dataset[dataset[:,0] ==0])/len(dataset)
+    predict_true = len(dataset[dataset[:,0] ==0])/float(len(dataset))
     return np.min(predict_true, 1-predict_true)
      
     
@@ -23,7 +23,9 @@ def entropy(dataset):
         Mathematically, this function return:
         C(p) = -p*log(p) - (1-p)log(1-p)
     '''
-    predict_true = len(dataset[dataset[:,0]==0])/len(dataset)
+    if len(dataset) == 0:
+        return 0
+    predict_true = len(dataset[dataset[:,0]==0])/float(len(dataset))
     entropy = -predict_true*np.log(predict_true) - (1-predict_true)*np.log(1-predict_true)
     return entropy
 
@@ -34,7 +36,10 @@ def gini_index(dataset):
         For dataset with 2 classes:
         C(p) = 2*p*(1-p)
     '''
-    predict_true = len(dataset[dataset[:,0]==0])/len(dataset)
+    if len(dataset) == 0:
+        return 0
+
+    predict_true = len(dataset[dataset[:,0]==0])/float(len(dataset))
 
     return 2 * predict_true * (1-predict_true)
 
@@ -136,18 +141,23 @@ class DecisionTree:
             - A boolean, True indicating the current node should be a leaf.
             - A label, indicating the label of the leaf (-1 if False)
         '''
+        data = np.array(data)
         major_label = int(len(data[data[:,0]==0]) < len(data[data[:,0]==1]))
 
         if len(data[0])==0:
+            print("dataset empty")
             return (True, 0)
-        elif node.depth > max_depth:
+        elif node.depth > self.max_depth:
+            print("dataset maxdepth")
             return (True, major_label)
         elif not indices :
+            print("no more indices")
             return (True, major_label)
         elif len(data[data[:,0]==data[0][0]]) == len(data):
+            print("all data same class")
             return (True, data[0][0])
         else:
-            return -1
+            return (False, 0)
             
 
 
@@ -166,30 +176,40 @@ class DecisionTree:
         #rows: all the data left
 
         ## QUESTION: what's the label of the intermidiate node
-        terminal, label = _is_terminal(node, rows, indicies):
+        terminal, label = self._is_terminal(node, rows, indices)
         if terminal:
+            print("terminal")
             node.label = label
             node.leaf = True
-            return
+            node.info = {"cost": 0, "data_size": len(rows)}
+
+            return indices
         else:
+            print("split")
+            rows = np.array(rows)
             max_gain = 0
             max_ind = 0
-            for ind in range(indices):
-                gain = self.calc_gain(rows, ind, self.gain_function)
+            for ind in indices:
+                gain = self._calc_gain(rows, ind, self.gain_function)
                 if gain > max_gain:
                     max_gain = gain
                     max_ind = ind
 
+            print(max_ind, max_gain)
             node.index_split_on = max_ind
-            #node.label = 
+            node.info = {"cost": max_gain, "data_size": len(rows)}
+            major_label = int(len(rows[rows[:,0]==0]) < len(rows[rows[:,0]==1]))
+            node.label = major_label
+
 
             indices.remove(max_ind)
+            print(indices)
             node.left = Node()
             node.left.depth = node.depth + 1
-            self_recurs(node.left, rows[rows[:,0]==0], indices)
+            indices = self._split_recurs(node.left, rows[rows[:,0]==0], indices)
             node.right = Node()
             node.right.depth = node.depth + 1
-            self_recurs(node.right, rows[rows[:,0]==1], indices)
+            self._split_recurs(node.right, rows[rows[:,0]==1], indices)
 
 
 
@@ -202,7 +222,9 @@ class DecisionTree:
         Here the C(p) is the gain_function. For example, if C(p) = min(p, 1-p), this would be
         considering training error gain. Other alternatives are entropy and gini functions.
         '''
-        prob_x_true = len(data[data[:,split_index]==1])/ len(data)
+        if len(data) ==0:
+            return 0
+        prob_x_true = len(data[data[:,split_index]==1])/ float(len(data))
         prob_x_false = 1 - prob_x_true
         Gain = gain_function(data) - prob_x_true * gain_function(data[data[:,split_index]==1]) + prob_x_false * gain_function(data[data[:,split_index]==0])
         return Gain
@@ -261,8 +283,11 @@ class DecisionTree:
         You do not need to modify this.
         '''
         labels = [row[0] for row in rows]
+        print(labels)
+        print(node.label)
         curr_num_correct = labels.count(node.label) - prev_num_correct
         node.info['curr_num_correct'] = curr_num_correct
+
 
         if not node.isleaf:
             left_data, right_data = [], []

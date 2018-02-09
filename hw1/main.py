@@ -22,8 +22,8 @@ def loss_plot(ax, title, tree, pruned_tree, train_data, test_data):
     fontsize=8
     ax.plot(tree.loss_plot_vec(train_data), label='train non-pruned')
     ax.plot(tree.loss_plot_vec(test_data), label='test non-pruned')
-    ax.plot(pruned_tree.loss_plot_vec(train_data), label='train pruned')
-    ax.plot(pruned_tree.loss_plot_vec(test_data), label='test pruned')
+    # ax.plot(pruned_tree.loss_plot_vec(train_data), label='train pruned')
+    # ax.plot(pruned_tree.loss_plot_vec(test_data), label='test pruned')
 
 
     ax.locator_params(nbins=3)
@@ -38,6 +38,15 @@ def explore_dataset(filename, class_name):
     print(np.array(train_data).shape) ##QUESTION: WHY 38?
     print(np.array(validation_data).shape)
     print(np.array(test_data).shape)
+
+
+    tree = DecisionTree(train_data)
+    pruned_tree = DecisionTree(train_data)
+    ax = plt.gca()
+    title = "training loss"
+    loss_plot(ax, title, tree, pruned_tree, train_data, test_data)
+    tree.print_tree()
+    # plt.show()
 
     # TODO: Print 12 loss values associated with the dataset.
     # For each measure of gain (training error, entropy, gini):

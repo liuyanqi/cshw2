@@ -33,6 +33,7 @@ def convert_to_binary_features(data, class_name):
         if len(feature_values) > 2: features.append(feature_values[:-1])
         else: features.append([feature_values[0]])
 
+    print(len(data[0]))
     new_data = []
     for obs in data:
         new_obs = [1 if obs[-1] == class_name else 0] # label = 1 if label in the dataset is won
