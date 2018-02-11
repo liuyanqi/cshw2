@@ -10,8 +10,10 @@ def train_error(dataset):
         For a dataset with two classes:
         C(p) = min{p, 1-p}
     '''
+    if len(dataset) ==0:
+        return 0
     predict_true = len(dataset[dataset[:,0] ==0])/float(len(dataset))
-    return np.min(predict_true, 1-predict_true)
+    return min(predict_true, 1-predict_true)
      
     
 
@@ -26,6 +28,8 @@ def entropy(dataset):
     if len(dataset) == 0:
         return 0
     predict_true = len(dataset[dataset[:,0]==0])/float(len(dataset))
+    if predict_true ==0 or predict_true ==1:
+        return 0
     entropy = -predict_true*np.log(predict_true) - (1-predict_true)*np.log(1-predict_true)
     return entropy
 
@@ -124,7 +128,41 @@ class DecisionTree:
         Do not prune if the node is non-leaf and has at least one non-leaf child.
         Prune if deleting the node could reduce loss on the validation data.
         '''
-        pass
+        validation_data = np.array(validation_data)
+        if node.isleaf:
+            return
+
+        # if not node.isleaf and not node.left.isleaf:
+        #     self._prune_recurs(node.left, validation_data)
+        # if not node.isleaf and not node.right.isleaf:
+        #     self._prune_recurs(node.right, validation_data)
+        else:
+            if node.left is not None and not node.left.isleaf:
+                self._prune_recurs(node.left,validation_data)
+            if node.right is not None and not node.right.isleaf:
+                self._prune_recurs(node.right, validation_data)
+
+            if (node.left is not None) and (node.right is not None) and (node.right.isleaf) and (node.left.isleaf):
+
+                loss = self.loss(validation_data)
+                # old_label = node.label
+                # major_label = int(len(validation_data[validation_data[:,0]==0]) < len(validation_data[validation_data[:,0]==1]))
+                # node.label = major_label
+                node_left = node.left
+                node_right = node.right
+                node.isleaf = True
+                node.left = None
+                node.right = None
+
+                loss_new = self.loss(validation_data)
+                if loss_new >= loss:
+                    node.isleaf = False
+                    node.left = node_left
+                    node.right = node_right
+                else:
+                    print("prune")
+                    # node.lable = old_label
+        
 
 
 
@@ -144,20 +182,20 @@ class DecisionTree:
         data = np.array(data)
         major_label = int(len(data[data[:,0]==0]) < len(data[data[:,0]==1]))
 
-        if len(data[0])==0:
-            print("dataset empty")
-            return (True, 0)
-        elif node.depth > self.max_depth:
-            print("dataset maxdepth")
+        if len(data)==0:
+            # print("dataset empty")
+            return (True, np.random.randint(0,1))
+        elif node.depth >= self.max_depth:
+            # print("dataset maxdepth")
             return (True, major_label)
-        elif not indices :
-            print("no more indices")
-            return (True, major_label)
-        elif len(data[data[:,0]==data[0][0]]) == len(data):
-            print("all data same class")
+        elif len(indices)==0:
+            # print("no more indices")
+            return (True, np.random.randint(0,1))
+        elif len(data[data[:,0]== data[0][0]]) == len(data):
+            # print("all data same class")
             return (True, data[0][0])
         else:
-            return (False, 0)
+            return (False, -1)
             
 
 
@@ -175,17 +213,14 @@ class DecisionTree:
         #node: parent node
         #rows: all the data left
 
-        ## QUESTION: what's the label of the intermidiate node
         terminal, label = self._is_terminal(node, rows, indices)
         if terminal:
-            print("terminal")
             node.label = label
-            node.leaf = True
+            node.isleaf = True
             node.info = {"cost": 0, "data_size": len(rows)}
-
-            return indices
+            return
         else:
-            print("split")
+            # print("split")
             rows = np.array(rows)
             max_gain = 0
             max_ind = 0
@@ -195,21 +230,23 @@ class DecisionTree:
                     max_gain = gain
                     max_ind = ind
 
-            print(max_ind, max_gain)
+
             node.index_split_on = max_ind
             node.info = {"cost": max_gain, "data_size": len(rows)}
             major_label = int(len(rows[rows[:,0]==0]) < len(rows[rows[:,0]==1]))
             node.label = major_label
-
+            if max_ind == 0:
+                return
+            
 
             indices.remove(max_ind)
-            print(indices)
+            
             node.left = Node()
             node.left.depth = node.depth + 1
-            indices = self._split_recurs(node.left, rows[rows[:,0]==0], indices)
+            self._split_recurs(node.left, rows[rows[:, max_ind]==1], indices[:])
             node.right = Node()
             node.right.depth = node.depth + 1
-            self._split_recurs(node.right, rows[rows[:,0]==1], indices)
+            self._split_recurs(node.right, rows[rows[:, max_ind]==0], indices[:])
 
 
 
@@ -226,7 +263,7 @@ class DecisionTree:
             return 0
         prob_x_true = len(data[data[:,split_index]==1])/ float(len(data))
         prob_x_false = 1 - prob_x_true
-        Gain = gain_function(data) - prob_x_true * gain_function(data[data[:,split_index]==1]) + prob_x_false * gain_function(data[data[:,split_index]==0])
+        Gain = gain_function(data) - prob_x_true * gain_function(data[data[:,split_index]==1]) - prob_x_false * gain_function(data[data[:,split_index]==0])
         return Gain
 
     def print_tree(self):
@@ -244,7 +281,8 @@ class DecisionTree:
             if node.isleaf:
                 return str(node.label)
             else:
-                decision = 'split attribute = %d; cost = %f; sample size = %d' % (node.index_split_on, node.info['cost'], node.info['data_size'])
+                # decision = 'split attribute = %d; cost = %f; sample size = %d' % (node.index_split_on, node.info['cost'], node.info['data_size'])
+                decision = 'split attribute = %d' % (node.index_split_on)
             left = indent + 'T -> '+ print_subtree(node.left, indent + '\t\t')
             right = indent + 'F -> '+ print_subtree(node.right, indent + '\t\t')
             return (decision + '\n' + left + '\n' + right)
@@ -253,6 +291,10 @@ class DecisionTree:
         print('----END PRINT TREE---')
 
 
+    def test_tree(self, tree):
+        print(tree.root.index_split_on)
+        print(tree.root.left.index_split_on)
+        print(tree.root.right.index_split_on)
 
 
     def loss_plot_vec(self, data):
@@ -273,7 +315,7 @@ class DecisionTree:
             if node.right != None:
                 q.append(node.right)
 
-        return 1 - np.array(loss_vec)/len(data)
+        return 1 - np.array(loss_vec)/float(len(data))
 
 
 
@@ -283,16 +325,13 @@ class DecisionTree:
         You do not need to modify this.
         '''
         labels = [row[0] for row in rows]
-        print(labels)
-        print(node.label)
         curr_num_correct = labels.count(node.label) - prev_num_correct
         node.info['curr_num_correct'] = curr_num_correct
-
-
         if not node.isleaf:
             left_data, right_data = [], []
             left_num_correct, right_num_correct = 0, 0
             for row in rows:
+                # print(node.index_split_on)
                 if row[node.index_split_on]:
                     left_data.append(row)
                 else:
