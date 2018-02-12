@@ -132,22 +132,16 @@ class DecisionTree:
         if node.isleaf:
             return
 
-        # if not node.isleaf and not node.left.isleaf:
-        #     self._prune_recurs(node.left, validation_data)
-        # if not node.isleaf and not node.right.isleaf:
-        #     self._prune_recurs(node.right, validation_data)
         else:
-            if node.left is not None and not node.left.isleaf:
-                self._prune_recurs(node.left,validation_data)
-            if node.right is not None and not node.right.isleaf:
+            if not node.left.isleaf:
+                self._prune_recurs(node.left, validation_data)
+            if not node.right.isleaf:
                 self._prune_recurs(node.right, validation_data)
 
-            if (node.left is not None) and (node.right is not None) and (node.right.isleaf) and (node.left.isleaf):
 
+            if node.left.isleaf and node.right.isleaf:
                 loss = self.loss(validation_data)
-                # old_label = node.label
-                # major_label = int(len(validation_data[validation_data[:,0]==0]) < len(validation_data[validation_data[:,0]==1]))
-                # node.label = major_label
+
                 node_left = node.left
                 node_right = node.right
                 node.isleaf = True
@@ -156,12 +150,12 @@ class DecisionTree:
 
                 loss_new = self.loss(validation_data)
                 if loss_new >= loss:
+                    # print("not prune")
                     node.isleaf = False
                     node.left = node_left
                     node.right = node_right
-                else:
-                    print("prune")
                     # node.lable = old_label
+
         
 
 
@@ -235,11 +229,11 @@ class DecisionTree:
             node.info = {"cost": max_gain, "data_size": len(rows)}
             major_label = int(len(rows[rows[:,0]==0]) < len(rows[rows[:,0]==1]))
             node.label = major_label
-            if max_ind == 0:
-                return
-            
 
-            indices.remove(max_ind)
+            if max_ind == 0:
+                node.isleaf=True
+                return
+                 
             
             node.left = Node()
             node.left.depth = node.depth + 1
