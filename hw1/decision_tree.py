@@ -12,7 +12,7 @@ def train_error(dataset):
     '''
     if len(dataset) ==0:
         return 0
-    predict_true = len(dataset[dataset[:,0] ==0])/float(len(dataset))
+    predict_true = len(dataset[dataset[:,0] ==1])/float(len(dataset))
     return min(predict_true, 1-predict_true)
      
     
@@ -27,7 +27,7 @@ def entropy(dataset):
     '''
     if len(dataset) == 0:
         return 0
-    predict_true = len(dataset[dataset[:,0]==0])/float(len(dataset))
+    predict_true = len(dataset[dataset[:,0]==1])/float(len(dataset))
     if predict_true ==0 or predict_true ==1:
         return 0
     entropy = -predict_true*np.log(predict_true) - (1-predict_true)*np.log(1-predict_true)
@@ -43,7 +43,7 @@ def gini_index(dataset):
     if len(dataset) == 0:
         return 0
 
-    predict_true = len(dataset[dataset[:,0]==0])/float(len(dataset))
+    predict_true = len(dataset[dataset[:,0]==1])/float(len(dataset))
 
     return 2 * predict_true * (1-predict_true)
 
@@ -184,7 +184,7 @@ class DecisionTree:
             return (True, major_label)
         elif len(indices)==0:
             # print("no more indices")
-            return (True, np.random.randint(0,1))
+            return (True, major_label)
         elif len(data[data[:,0]== data[0][0]]) == len(data):
             # print("all data same class")
             return (True, data[0][0])
@@ -225,6 +225,7 @@ class DecisionTree:
                     max_ind = ind
 
 
+
             node.index_split_on = max_ind
             node.info = {"cost": max_gain, "data_size": len(rows)}
             major_label = int(len(rows[rows[:,0]==0]) < len(rows[rows[:,0]==1]))
@@ -232,9 +233,11 @@ class DecisionTree:
 
             if max_ind == 0:
                 node.isleaf=True
+                # print("can't improve")
                 return
                  
-            
+            indices.remove(max_ind)
+
             node.left = Node()
             node.left.depth = node.depth + 1
             self._split_recurs(node.left, rows[rows[:, max_ind]==1], indices[:])
