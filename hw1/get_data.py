@@ -30,16 +30,15 @@ def convert_to_binary_features(data, class_name):
     features = []
     for feature_index in range(0, len(data[0])-1):
         feature_values = list(set([obs[feature_index] for obs in data]))
+        feature_values.sort()
         if len(feature_values) > 2: features.append(feature_values[:-1])
         else: features.append([feature_values[0]])
-
-    print(len(data[0]))
     new_data = []
     for obs in data:
         new_obs = [1 if obs[-1] == class_name else 0] # label = 1 if label in the dataset is won
         for feature_index in range(0, len(data[0]) - 1):
             current_feature_value = obs[feature_index]
-            for possible_feature_value in features[feature_index - 1]:
+            for possible_feature_value in features[feature_index]:
                 new_obs.append(current_feature_value == possible_feature_value)
         new_data.append(new_obs)
 

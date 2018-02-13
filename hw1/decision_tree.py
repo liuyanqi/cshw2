@@ -138,7 +138,6 @@ class DecisionTree:
             if not node.right.isleaf:
                 self._prune_recurs(node.right, validation_data)
 
-
             if node.left.isleaf and node.right.isleaf:
                 loss = self.loss(validation_data)
 
@@ -150,11 +149,9 @@ class DecisionTree:
 
                 loss_new = self.loss(validation_data)
                 if loss_new >= loss:
-                    # print("not prune")
                     node.isleaf = False
                     node.left = node_left
                     node.right = node_right
-                    # node.lable = old_label
 
         
 
@@ -216,7 +213,7 @@ class DecisionTree:
         else:
             # print("split")
             rows = np.array(rows)
-            max_gain = 0
+            max_gain = -1
             max_ind = 0
             for ind in indices:
                 gain = self._calc_gain(rows, ind, self.gain_function)
@@ -225,16 +222,15 @@ class DecisionTree:
                     max_ind = ind
 
 
-
             node.index_split_on = max_ind
             node.info = {"cost": max_gain, "data_size": len(rows)}
             major_label = int(len(rows[rows[:,0]==0]) < len(rows[rows[:,0]==1]))
             node.label = major_label
 
-            if max_ind == 0:
-                node.isleaf=True
-                # print("can't improve")
-                return
+            # if max_ind == 0:
+            # #     node.isleaf=True
+            #      print("can't improve")
+            # #     return
                  
             indices.remove(max_ind)
 
