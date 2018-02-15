@@ -37,14 +37,11 @@ def loss_plot(ax, title, tree, pruned_tree, train_data, test_data):
 def explore_dataset(filename, class_name):
     train_data, validation_data, test_data = get_data(filename, class_name)
 
-    print(np.array(train_data).shape) ##QUESTION: WHY 38?
-    print(np.array(validation_data).shape)
-    print(np.array(test_data).shape)
 
     gain_function =[train_error, entropy, gini_index]
 
-    tree = DecisionTree(train_data)
-    pruned_tree = DecisionTree(train_data,validation_data)
+    tree = DecisionTree(train_data, gain_function=gini_index)
+    pruned_tree = DecisionTree(train_data,validation_data, gain_function=gini_index)
 
     # tree.test_tree(tree)
 
@@ -58,17 +55,22 @@ def explore_dataset(filename, class_name):
         print("average train(pruned) error: ", pruned_tree.loss(train_data))
         print("average test(pruned) error: ", pruned_tree.loss(test_data))
 
-    ax = plt.gca()
-    title = "training loss"
-    loss_plot(ax, title, tree, pruned_tree, train_data, test_data)
-    plt.show()
+    # ax = plt.gca()
+    # title = "spam: loss with train error"
+    # loss_plot(ax, title, tree, pruned_tree, train_data, test_data)
+    # plt.show()
 
     # depth_range = range(1,16)
-    # error = []
-    # for max_depth in depth_range:
-    #     tree = DecisionTree(train_data, validation_data, max_depth=max_depth)
-    #     error.append(np.average(tree.loss_plot_vec(train_data)))
-    # plt.plot(error)
+    # plot = []
+    # for gain_f in gain_function:
+    #     error = []
+    #     for max_depth in depth_range:
+    #         tree = DecisionTree(train_data, validation_data,max_depth=max_depth, gain_function=gain_f)
+    #         error.append(np.average(tree.loss_plot_vec(train_data)))
+    #     plt1, = plt.plot(error)
+    #     plot.append(plt1)
+    # plt.legend(plot, ['train_error', 'entropy', 'gini_index'])
+    # plt.title("training error vs decision tree depth with pruned tree")
     # plt.show()
 
 
@@ -91,7 +93,7 @@ def main():
     np.random.seed(1)
     #########################################################################
 
-    # explore_dataset('data/chess.csv', 'won')
+    explore_dataset('data/chess.csv', 'won')
     explore_dataset('data/spam.csv', '1')
 
 main()

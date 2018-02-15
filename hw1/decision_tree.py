@@ -236,10 +236,10 @@ class DecisionTree:
 
             node.left = Node()
             node.left.depth = node.depth + 1
-            self._split_recurs(node.left, rows[rows[:, max_ind]==1], indices[:])
+            self._split_recurs(node.left, rows[rows[:, max_ind]==1], copy.copy(indices))
             node.right = Node()
             node.right.depth = node.depth + 1
-            self._split_recurs(node.right, rows[rows[:, max_ind]==0], indices[:])
+            self._split_recurs(node.right, rows[rows[:, max_ind]==0], copy.copy(indices))
 
 
 
