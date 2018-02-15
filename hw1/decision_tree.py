@@ -138,20 +138,20 @@ class DecisionTree:
             if not node.right.isleaf:
                 self._prune_recurs(node.right, validation_data)
 
-            if node.left.isleaf and node.right.isleaf:
-                loss = self.loss(validation_data)
+            # if node.left.isleaf and node.right.isleaf:
+            loss = self.loss(validation_data)
 
-                node_left = node.left
-                node_right = node.right
-                node.isleaf = True
-                node.left = None
-                node.right = None
+            node_left = node.left
+            node_right = node.right
+            node.isleaf = True
+            node.left = None
+            node.right = None
 
-                loss_new = self.loss(validation_data)
-                if loss_new >= loss:
-                    node.isleaf = False
-                    node.left = node_left
-                    node.right = node_right
+            loss_new = self.loss(validation_data)
+            if loss_new >= loss:
+                node.isleaf = False
+                node.left = node_left
+                node.right = node_right
 
         
 
