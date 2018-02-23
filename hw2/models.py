@@ -20,6 +20,8 @@ class NaiveBayes(object):
     def __init__(self, n_classes):
         """ Initializes a NaiveBayes classifer with n_classes. """
         self.n_classes = n_classes
+        self.table = np.full((784, self.n_classes), 0.01)
+        self.count_class = np.zeros(n_classes)
         # You are free to add more fields here.
 
     def train(self, data):
@@ -31,6 +33,20 @@ class NaiveBayes(object):
             None
         """
         # TODO
+        inputs = data.inputs
+        labels = data.labels
+
+        for idx, d in enumerate(inputs):
+            self.table[:,labels[idx]] += d
+            self.count_class[labels[idx]] += 1
+        table_sum = np.sum(self.table, axis=1)
+
+        for i in range(784):
+            self.table[i,:] /= self.count_class
+        self.count_class /= np.sum(self.count_class)
+
+
+
 
     def predict(self, inputs):
         """ Outputs a predicted label for each input in inputs.
@@ -41,6 +57,21 @@ class NaiveBayes(object):
             a numpy array of predictions
         """
         #TODO
+        predict = []
+        for idx, ip in enumerate(inputs):
+            print(idx)
+            score = np.zeros(self.n_classes)
+            for label in range(self.n_classes):
+                for idx2, feat in enumerate(ip):
+                    if feat:
+                        score[label] += np.log(self.table[idx2,label])
+                    else:
+                        score[label] += np.log(1-self.table[idx2, label])
+                score[label] += np.log(self.count_class[label])
+
+            predict.append(np.argmax(np.array(score)))
+
+        return np.array(predict)
 
     def accuracy(self, data):
         """ Outputs the accuracy of the trained model on a given dataset (data).
@@ -52,7 +83,10 @@ class NaiveBayes(object):
             a float number indicating accuracy (between 0 and 1)
         """
         #TODO
-
+        prediction = self.predict(data.inputs)
+        correct = np.sum(prediction == data.labels)
+        print(float(correct)/len(data.labels))
+        return float(correct)/len(data.labels)
 
 class LogisticRegression(object):
     """ Multinomial Linear Regression
@@ -78,6 +112,36 @@ class LogisticRegression(object):
         @return:
             None
         """
+        diff = 10000
+        iteration = 0
+        index_array = range(len(data.inputs))
+        old_weights = np.ones((self.n_features, self.n_classes))
+        # while np.allclose(old_weights, self.weights, rtol=1e-01, atol=1e-02, equal_nan=False) is False: ## repeat until convergence
+            ##shuffle dataset
+        while diff > 0.4:
+            random.shuffle(index_array)
+
+            labels = data[1]
+            inputs = data[0]
+            print(iteration)
+            iteration +=1
+            old_weights = self.weights
+            for idx in index_array:
+                loss = np.dot(inputs[idx],self.weights)
+                p = self._softmax(loss)
+                gradient = np.zeros(self.n_classes)
+                for i in range(self.n_classes):
+                    if i == labels[idx]:
+                        gradient[i] = p[i] - 1
+                    else:
+                        gradient[i] = p[i]
+                grad = np.outer(inputs[idx], gradient)
+                self.weights = self.weights - self.alpha * grad
+                ## normalize the weight???
+            diff = np.sum(np.sum(np.absolute(old_weights-self.weights)))/ float(np.sum(len(x) for x in self.weights))
+            print(diff)
+
+
         #TODO
 
     def predict(self, inputs):
@@ -88,6 +152,11 @@ class LogisticRegression(object):
         @return:
             None
         """
+        prediction = []
+        for ip in inputs:
+            l = np.dot(ip,self.weights)
+            prediction.append(np.argmax(self._softmax(l)))
+        return prediction
         #TODO
 
     def accuracy(self, data):
@@ -99,6 +168,12 @@ class LogisticRegression(object):
         @return:
             a float number indicating accuracy (between 0 and 1)
         """
+
+        prediction = self.predict(data.inputs)
+        correct = np.sum(prediction == data.labels)
+        return float(correct)/len(data.labels)
+
+
         #TODO
 
     def _softmax(self, x):
