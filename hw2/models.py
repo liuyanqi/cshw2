@@ -50,7 +50,6 @@ class NaiveBayes(object):
 
     def predict(self, inputs):
         """ Outputs a predicted label for each input in inputs.
-
         @params:
             inputs: a NumPy array containing inputs
         @return:
@@ -59,7 +58,6 @@ class NaiveBayes(object):
         #TODO
         predict = []
         for idx, ip in enumerate(inputs):
-            print(idx)
             score = np.zeros(self.n_classes)
             for label in range(self.n_classes):
                 for idx2, feat in enumerate(ip):
@@ -85,7 +83,6 @@ class NaiveBayes(object):
         #TODO
         prediction = self.predict(data.inputs)
         correct = np.sum(prediction == data.labels)
-        print(float(correct)/len(data.labels))
         return float(correct)/len(data.labels)
 
 class LogisticRegression(object):
@@ -99,10 +96,10 @@ class LogisticRegression(object):
     """
     def __init__(self, n_features, n_classes):
         """ Initializes a LogisticRegression classifer. """
-        self.alpha = 0.2  # tune this parameter
+        self.alpha = 0.005  # tune this parameter
         self.n_features = n_features
         self.n_classes = n_classes
-        self.weights = np.zeros((n_features, n_classes))
+        self.weights = np.ones((n_features, n_classes))
 
     def train(self, data):
         """ Trains the model, using stochastic gradient descent
@@ -116,31 +113,29 @@ class LogisticRegression(object):
         iteration = 0
         index_array = range(len(data.inputs))
         old_weights = np.ones((self.n_features, self.n_classes))
+        l =[]
+        l.append(1-self.accuracy(data))
         # while np.allclose(old_weights, self.weights, rtol=1e-01, atol=1e-02, equal_nan=False) is False: ## repeat until convergence
             ##shuffle dataset
-        while diff > 0.4:
+        while diff > 0.07 and iteration < 15:
             random.shuffle(index_array)
-
+            iteration+=1
             labels = data[1]
             inputs = data[0]
-            print(iteration)
-            iteration +=1
             old_weights = self.weights
             for idx in index_array:
                 loss = np.dot(inputs[idx],self.weights)
                 p = self._softmax(loss)
                 gradient = np.zeros(self.n_classes)
-                for i in range(self.n_classes):
-                    if i == labels[idx]:
-                        gradient[i] = p[i] - 1
-                    else:
-                        gradient[i] = p[i]
+                gradient = [p[i] -1 if i == labels[idx] else p[i] for i in range(self.n_classes)]
+
                 grad = np.outer(inputs[idx], gradient)
                 self.weights = self.weights - self.alpha * grad
-                ## normalize the weight???
-            diff = np.sum(np.sum(np.absolute(old_weights-self.weights)))/ float(np.sum(len(x) for x in self.weights))
-            print(diff)
 
+
+            # diff = np.sum(np.sum(np.absolute(old_weights-self.weights)))/ float(np.sum(len(x) for x in self.weights))
+            diff = np.absolute(old_weights - self.weights).max()
+        return l
 
         #TODO
 

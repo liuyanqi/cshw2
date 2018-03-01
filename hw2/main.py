@@ -17,6 +17,8 @@ import numpy as np
 import random
 from models import NaiveBayes, LogisticRegression
 
+import matplotlib.pyplot as plt
+
 
 def main():
     Dataset = namedtuple('Dataset', ['inputs', 'labels'])
@@ -43,9 +45,9 @@ def main():
     print("{:.1f}%".format(model.accuracy(data_test) * 100))
 
     # run logistic regression
-    # model = LogisticRegression(784, 10)
-    # model.train(data_train)
-    # print("{:.1f}%".format(model.accuracy(data_test) * 100))
+    model = LogisticRegression(784, 10)
+    model.train(data_train)
+    print("{:.1f}%".format(model.accuracy(data_test) * 100))
 
 
 if __name__ == "__main__":
