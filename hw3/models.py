@@ -57,8 +57,10 @@ class KNeighborsClassifier(object):
         # 2. Compute the highest label response given the k nearest neighbors
         # Use the helper methods!
 
-        # TODO
-        pass
+        top_k_index = get_neighbors_indices(self.train_inputs, X, self.k)
+        index = get_response(self.train_labels, top_k_index)
+        return index
+
 
     def accuracy(self, data):
         """
@@ -68,7 +70,14 @@ class KNeighborsClassifier(object):
         :return: a float number indicating accuracy
         """
         # TODO: Compute the portion of data with correctly predicted labels
-        pass
+        correct = 0
+        total = len(data.inputs)
+        for idx, ip in enumerate(data.inputs):
+            prediction = self.predict(ip)
+            if prediction == data.labels[idx]:
+                correct += 1
+        return float(correct)/total
+
 
 class KmeansClassifier(object):
     """

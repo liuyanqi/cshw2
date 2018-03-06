@@ -140,7 +140,8 @@ def test_KNN(train_data, test_data, N_NEIGHBORS = 6):
     model = KNeighborsClassifier(N_NEIGHBORS)
     model.train(train_data.inputs, train_data.labels)
     accuracy = model.accuracy(test_data)
-    print("Testing on K Nearest Neighbor Classifier (K = " + str(N_NEIGHBORS) + "), the accuracy is {:.2f}%".format(accuracy * 100))
+    print(accuracy)
+    # print("Testing on K Nearest Neighbor Classifier (K = " + str(N_NEIGHBORS) + "), the accuracy is {:.2f}%".format(accuracy * 100))
 
 def test_Kmeans(train_data, test_data, NUM_CLUSTERS = 3):
     """
@@ -184,7 +185,7 @@ def test_Dtree(data):
 
     # Construct the decision tree
     decision_tree =  DecisionTree(train_data, gain_function='entropy')
-    decision_tree.visualize_tree()
+    # decision_tree.visualize_tree()
     print("\nExploring dataset with entropy...")
     print("Training size: ",len(train_data) )
     print("Test size: ",len(test_data) )
@@ -237,8 +238,10 @@ def main():
 
     # DO NOT MODIFY ABOVE THIS LINE!
     # TODO: call test_KNN(), test_Kmeans() and test_Dtree() to test your implementation
-    test_Dtree()
+    # test_Dtree(data)
+    test_KNN(train_data, test_data)
     # TODO: try out plot_KNN() on the iris data and plot_Kmeans() on the digits data
+    plot_KNN()
 
 if __name__ == '__main__':
     main()

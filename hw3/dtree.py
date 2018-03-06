@@ -175,21 +175,25 @@ def split_recurs(node, data, indices,  gain_function, max_depth):
     #  TODO: Go through all the attributes that you can still split on
     #  and for each attribute, try all possible values that you can split on to
     #  find the split that maximizes the gain_function.
+    data = np.array(data)
     max_gain = -1
     for ind in indices:
         ##QUESTION: 
-        for val in self.split_value:
-            gain = self.calc_info_gain(data, ind, val, gain_function)
+        feature = data[:, ind]
+        unique_feature = list(set(feature))
+        for val in unique_feature:
+            gain = calc_info_gain(data, ind, val, gain_function)
             if gain > max_gain:
                 split_value = val
                 split_index = ind
+                max_gain = gain
 
     #  If you have correctly implemented the TODO above, split_index
     #  and split_value should not be None at this point.
     if split_index is None or split_value is None:
         print("ERROR: split_index or split_value was not set.")
         exit(1)
-
+    # print(split_index, split_value, max_gain)
     node.index_split_on = split_index
     node.split_value = split_value
 
