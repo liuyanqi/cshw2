@@ -4,6 +4,8 @@
     It contains helper functions required by K-means method via iterative improvement
 
 """
+import random
+import numpy as np
 
 def init_centroids(k, inputs):
     """
@@ -14,7 +16,15 @@ def init_centroids(k, inputs):
     :return: a Numpy array of k cluster centroids, one per row
     """
     # TODO
-    pass
+    centroid_idx = []
+    for i in range(k):
+        centroid_idx.append(random.randint(0,len(inputs)))
+
+    centroid = []
+    for idx in centroid_idx:
+        centroid.append(inputs[idx])
+
+    return centroid
 
 
 def assign_step(inputs, centroids):
@@ -26,7 +36,18 @@ def assign_step(inputs, centroids):
     :return: a Python list of centroid indices, one for each row of the inputs
     """
     # TODO
-    pass
+    centroid_idx = []
+
+    for ip in inputs:
+        min_dist = 10000000
+        min_cent_idx = 0
+        for idx, cent in enumerate(centroids):
+            dist = np.linalg.norm(ip - cent)
+            if dist < min_dist:
+                min_dist = dist
+                min_cent_idx = idx
+        centroid_idx.append(min_cent_idx)
+    return centroid_idx
 
 
 def update_step(inputs, indices, k):
@@ -39,7 +60,20 @@ def update_step(inputs, indices, k):
     :return: a Numpy array of k cluster centroids, one per row
     """
     # TODO
-    pass
+    ##QUESTION: why k is needed
+
+    centroid = np.zeros((k, len(inputs[0])))
+    centroid_count = np.zeros(k)
+
+    for idx, ip in enumerate(inputs):
+        centroid[indices[idx]] += ip
+        centroid_count[indices[idx]] += 1
+
+    for idx in range(len(centroid)):
+        if centroid_count[idx] != 0:
+            centroid[idx] = centroid[idx] / centroid_count[idx]
+    return centroid
+
 
 
 def kmeans(inputs, k, max_iter, tol):
@@ -56,4 +90,15 @@ def kmeans(inputs, k, max_iter, tol):
     :return: a Numpy array of k cluster centroids, one per row
     """
     # TODO
-    pass
+    iteration = 0
+    error = 1000
+    k_centriod = init_centroids(k, inputs)
+    while iteration < max_iter and error > tol:
+        input_cent = assign_step(inputs, k_centriod)
+        k_centriod_new = update_step(inputs, input_cent, k)
+        error = np.linalg.norm(k_centriod_new - k_centriod)
+        # print("iteration: ", iteration, "error: ", error)
+        k_centriod = k_centriod_new
+        iteration += 1
+
+    return k_centriod

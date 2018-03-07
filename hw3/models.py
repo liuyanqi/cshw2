@@ -56,9 +56,12 @@ class KNeighborsClassifier(object):
         # 1. Compute the k nearest neighbors (indices)
         # 2. Compute the highest label response given the k nearest neighbors
         # Use the helper methods!
+        index = []
+        for ip in X:
+            top_k_index = get_neighbors_indices(self.train_inputs, ip, self.k)
 
-        top_k_index = get_neighbors_indices(self.train_inputs, X, self.k)
-        index = get_response(self.train_labels, top_k_index)
+            ind = get_response(self.train_labels, top_k_index)
+            index.append(ind)
         return index
 
 
@@ -72,9 +75,9 @@ class KNeighborsClassifier(object):
         # TODO: Compute the portion of data with correctly predicted labels
         correct = 0
         total = len(data.inputs)
-        for idx, ip in enumerate(data.inputs):
-            prediction = self.predict(ip)
-            if prediction == data.labels[idx]:
+        prediction = self.predict(data.inputs)
+        for idx, p in enumerate(prediction):    
+            if p == data.labels[idx]:
                 correct += 1
         return float(correct)/total
 
@@ -116,7 +119,15 @@ class KmeansClassifier(object):
         :return: None
         """
         # TODO
-        pass
+        for label in list(set(y)):
+            input_label=[]
+            for idx in range(len(X)):
+                if y[idx] == label:
+                    input_label.append(X[idx])
+
+            k_centriod = kmeans(input_label, self.k, self.max_iter, self.tol)
+            self.cluster_centers_[label] = k_centriod
+
 
     def predict(self, X):
         """
@@ -127,7 +138,19 @@ class KmeansClassifier(object):
         :return: a Python list of labels predicted by model
         """
         # TODO
-        pass
+        prediction = []
+        for ip in X:
+            label = 0
+            min_dist = 10000
+            for lab, centroids in self.cluster_centers_.iteritems():
+                for cent in centroids:
+                    dist = np.linalg.norm(ip - cent)
+                    if dist < min_dist:
+                        min_dist = dist
+                        label = lab
+
+            prediction.append(label)
+        return np.array(prediction)
 
     def accuracy(self, data):
         """
@@ -137,7 +160,13 @@ class KmeansClassifier(object):
         :return: a float number indicating accuracy
         """
         # TODO: Compute the portion of data with correctly predicted labels
-        pass
+        correct = 0
+        total = len(data.inputs)
+        prediction = self.predict(data.inputs)
+        for idx, p in enumerate(prediction):    
+            if p == data.labels[idx]:
+                correct += 1
+        return float(correct)/total
 
 class DecisionTree:
     """
@@ -177,7 +206,7 @@ class DecisionTree:
         :param X: A dataset as a python list of lists
         :return: A list of labels predicted by the trained decision tree
         """
-        labels = [predict_recurs(self.root, data) for data in X]
+        labels = [predict_recurs(self.root, np.array(data)) for data in X]
         return labels
 
     def accuracy(self, data):

@@ -19,7 +19,7 @@ def euclidean_distance(input1, input2):
 
     # Recall the definition of Euclidean distance for two vectors x,y
     # d = sqrt(sum(x_i - y_i)^2)
-    return np.linalg.norm(input1- input2) 
+    return np.linalg.norm(input1 - input2) 
 
 
 def get_neighbors_indices(training_inputs, test_instance, k):
@@ -39,7 +39,7 @@ def get_neighbors_indices(training_inputs, test_instance, k):
         dist[d] = idx
 
     top_k_index = []
-    for key in sorted(dist):
+    for key in sorted(dist)[:k]:
         top_k_index.append(dist[key])
     return top_k_index
 
@@ -51,11 +51,11 @@ def get_response(training_labels, neighbor_indices):
     :param neighbor_indices: a Python list of indices of k closest neighbors from the training data
     :return: the class/label with the highest vote, an int
     """
-    # TODO
-    label_count = np.zeros(len(training_labels))
+    # TODO]
+    label_count = np.zeros(int(np.max(training_labels))+1)
     for idx in neighbor_indices:
-        label_count[training_labels[idx]] +=1
-
+        label_count[int(training_labels[idx])] +=1
+        # print(training_labels[idx])
 
     return np.argmax(label_count)
 

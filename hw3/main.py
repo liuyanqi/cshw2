@@ -65,6 +65,7 @@ def plot_KNN(data, N_NEIGHBORS=6, h=0.02):
     model.train(X, y)
     Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
 
+
     # Put the result into a color plot
     Z = Z.reshape(xx.shape)
     plt.figure()
@@ -107,6 +108,7 @@ def plot_Kmeans(data, NUM_CLUSTERS = 3):
     model.train(data.inputs, data.labels)
     cluster_centers = model.cluster_centers_
 
+
     fig, ax = plt.subplots(NUM_CLUSTERS, len(cluster_centers.keys()), figsize=(8, 3))
     unflattened_centers = np.array(list(cluster_centers.values())).reshape(len(cluster_centers.keys()), NUM_CLUSTERS, 8,
                                                                            8)
@@ -141,7 +143,7 @@ def test_KNN(train_data, test_data, N_NEIGHBORS = 6):
     model.train(train_data.inputs, train_data.labels)
     accuracy = model.accuracy(test_data)
     print(accuracy)
-    # print("Testing on K Nearest Neighbor Classifier (K = " + str(N_NEIGHBORS) + "), the accuracy is {:.2f}%".format(accuracy * 100))
+    print("Testing on K Nearest Neighbor Classifier (K = " + str(N_NEIGHBORS) + "), the accuracy is {:.2f}%".format(accuracy * 100))
 
 def test_Kmeans(train_data, test_data, NUM_CLUSTERS = 3):
     """
@@ -239,9 +241,11 @@ def main():
     # DO NOT MODIFY ABOVE THIS LINE!
     # TODO: call test_KNN(), test_Kmeans() and test_Dtree() to test your implementation
     # test_Dtree(data)
-    test_KNN(train_data, test_data)
+    # test_KNN(train_data, test_data, N_NEIGHBORS=7)
+    test_Kmeans(train_data, test_data, NUM_CLUSTERS = 3)
     # TODO: try out plot_KNN() on the iris data and plot_Kmeans() on the digits data
-    plot_KNN()
+    # plot_KNN(train_data, N_NEIGHBORS=3)
+    # plot_Kmeans(test_data, NUM_CLUSTERS=3)
 
 if __name__ == '__main__':
     main()
