@@ -142,8 +142,8 @@ def test_KNN(train_data, test_data, N_NEIGHBORS = 6):
     model = KNeighborsClassifier(N_NEIGHBORS)
     model.train(train_data.inputs, train_data.labels)
     accuracy = model.accuracy(test_data)
-    print(accuracy)
     print("Testing on K Nearest Neighbor Classifier (K = " + str(N_NEIGHBORS) + "), the accuracy is {:.2f}%".format(accuracy * 100))
+    return accuracy
 
 def test_Kmeans(train_data, test_data, NUM_CLUSTERS = 3):
     """
@@ -167,7 +167,7 @@ def test_Kmeans(train_data, test_data, NUM_CLUSTERS = 3):
     model.train(train_data.inputs, train_data.labels)
     accuracy = model.accuracy(test_data)
     print("Testing on K-Means Classifier (K = " + str(NUM_CLUSTERS) + "), the accuracy is {:.2f}%".format(accuracy * 100))
-
+    return accuracy
 
 def test_Dtree(data):
     """
@@ -240,11 +240,24 @@ def main():
 
     # DO NOT MODIFY ABOVE THIS LINE!
     # TODO: call test_KNN(), test_Kmeans() and test_Dtree() to test your implementation
-    # test_Dtree(data)
-    # test_KNN(train_data, test_data, N_NEIGHBORS=7)
-    test_Kmeans(train_data, test_data, NUM_CLUSTERS = 3)
+    # acc_list = []
+    test_KNN(train_data, test_data, N_NEIGHBORS=1)
+    test_Kmeans(train_data, test_data, NUM_CLUSTERS=3)
+    test_Dtree(data)
+
+    # for k in range(1, 16, 2):
+    #     acc = test_KNN(train_data, test_data, N_NEIGHBORS= k)
+    #     acc_list.append(acc)
+    # x = list(range(1,16,2))
+    # plt.plot(x, acc_list)
+    # plt.xticks(x, x)
+    # plt.title("KNN accuracy on fishiris dataset")
+    # plt.xlabel("number of k neighbors")
+    # plt.ylabel("accuracy")
+    # plt.ylim([0.95,1])
+    # plt.show()
     # TODO: try out plot_KNN() on the iris data and plot_Kmeans() on the digits data
-    # plot_KNN(train_data, N_NEIGHBORS=3)
+    # plot_KNN(test_data, N_NEIGHBORS=7)
     # plot_Kmeans(test_data, NUM_CLUSTERS=3)
 
 if __name__ == '__main__':

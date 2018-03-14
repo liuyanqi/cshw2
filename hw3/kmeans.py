@@ -18,7 +18,7 @@ def init_centroids(k, inputs):
     # TODO
     centroid_idx = []
     for i in range(k):
-        centroid_idx.append(random.randint(0,len(inputs)))
+        centroid_idx.append(random.randint(0,len(inputs)-1))
 
     centroid = []
     for idx in centroid_idx:

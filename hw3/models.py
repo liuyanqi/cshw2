@@ -62,7 +62,7 @@ class KNeighborsClassifier(object):
 
             ind = get_response(self.train_labels, top_k_index)
             index.append(ind)
-        return index
+        return np.array(index)
 
 
     def accuracy(self, data):
@@ -142,7 +142,7 @@ class KmeansClassifier(object):
         for ip in X:
             label = 0
             min_dist = 10000
-            for lab, centroids in self.cluster_centers_.iteritems():
+            for lab, centroids in self.cluster_centers_.items():
                 for cent in centroids:
                     dist = np.linalg.norm(ip - cent)
                     if dist < min_dist:
