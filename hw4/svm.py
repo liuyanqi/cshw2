@@ -67,17 +67,20 @@ class SVM(object):
         # TODO: Uncomment the next line when you have implemented _objective_function(),
         # _inequality_constraints() and _equality_constraints().
         self.alphas = solve_QP(Q, c, A, b, E, d)
+
         alphas_idx = 0
         for idx in range(len(self.train_labels)):
-            if self.alphas[idx] > 0 and self.alphas[idx] < (1.0/(2*len(self.train_labels)*self.lambda_param)):
+            if  not np.isclose(self.alphas[idx], 0, atol=1e-3) and not np.isclose(self.alphas[idx],(1.0/(2*len(self.train_labels)*self.lambda_param)), atol=1e-3):
                 alphas_idx = idx
                 break
+
         self.alphas_idx = alphas_idx
         sum_b = 0
         for idx, x_j in enumerate(self.train_inputs):
             sum_b += self.alphas[idx]*(2*self.train_labels[idx]-1)*self.kernel_func(x_j, self.train_inputs[alphas_idx])
         b = sum_b - (2* self.train_labels[alphas_idx] -1)
         self.b = b
+        # print(self.b)
 
 
 
