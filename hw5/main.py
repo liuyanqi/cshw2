@@ -32,7 +32,7 @@ def test_models(dataset, epochs, test_size=0.2):
 
     print('Running models on {} dataset'.format(dataset))
 
-    # #### Linear Regression ######
+    #### Linear Regression ######
     # print('----- LINEAR REGRESSION -----')
     # # Add a bias
     # X_train_b = np.append(X_train, np.ones((len(X_train), 1)), axis=1)
@@ -53,7 +53,7 @@ def test_models(dataset, epochs, test_size=0.2):
     print('----- 2-Layer NN -----')
     model = TwoLayerNN(10)
     # Use X without a bias, since we learn a bias in the 2 layer NN.
-    model.train(X_train, Y_train, epochs=epochs, print_loss=False)
+    model.train(X_train, Y_train, epochs=epochs, print_loss=True)
     print('Average Training Loss:', model.average_loss(X_train, Y_train))
     print('Average Testing Loss:', model.average_loss(X_test, Y_test))
 

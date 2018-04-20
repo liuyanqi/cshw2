@@ -10,8 +10,9 @@ def l2_loss(Y, predictions):
         :param predictions A 1D Numpy array of the same size of Y
         :return L2 loss using predictions for Y.
     '''
-    norm = np.linalg.norm(Y-predictions)
-    return np.power(norm, 2)
+    # norm = np.linalg.norm(Y-predictions)
+    # return np.power(norm, 2)
+    return np.sum((Y - predictions) ** 2)
     
 
 def sigmoid(x):
@@ -181,7 +182,7 @@ class TwoLayerNN:
         self.output_weights = None
         self.output_bias = None
 
-    def train(self, X, Y, learning_rate=0.001, epochs=1000, print_loss=True):
+    def train(self, X, Y, learning_rate=0.01, epochs=1000, print_loss=True):
         '''
         Trains the TwoLayerNN with SGD using Backpropagation.
 
@@ -193,7 +194,7 @@ class TwoLayerNN:
         :return None
         '''
         #TODO
-        self.hidden_weights = np.zeros((len(X[1]), self.hidden_size))
+        self.hidden_weights = np.zeros((len(X[0]), self.hidden_size))
         self.hidden_bias = np.zeros(self.hidden_size)
         self.output_weights = np.zeros(self.hidden_size)
         self.output_bias = np.zeros(1)
@@ -201,30 +202,32 @@ class TwoLayerNN:
             print(ep)
             index = np.arange(len(X))
             np.random.shuffle(index)
-            print(self.average_loss(X, Y))
+            if print_loss:
+                print(self.average_loss(X, Y))
             for i in index:
 
                 logits = np.dot(X[i], self.hidden_weights) + self.hidden_bias
                 h = sigmoid(logits)
                 z = np.dot(h, self.output_weights) + self.output_bias
-                loss = l2_loss(z, Y[i])
 
                 obias_grad = 2*(z - Y[i])
-                vi_grad = np.array([2*(z - Y[i])*h_i for h_i in h])
-                vi_grad = vi_grad.reshape(len(vi_grad))
+
+                vi_grad = np.zeros(self.hidden_size)
                 b1i_grad = np.zeros(self.hidden_size)
                 wij_grad = np.zeros(self.hidden_weights.shape)
 
                 for j in range(self.hidden_size):
+                    vi_grad[j] = 2* (z - Y[i]) * h[j]
+
                     grad = 2* (z - Y[i]) * self.output_weights[j]
                     grad = grad *sigmoid_derivative(np.dot(X[i], self.hidden_weights[:,j]) + self.hidden_bias[j])
                     b1i_grad[j] = grad
 
-                    for k in range(len(X[1])):
+                    for k in range(len(X[0])):
                         w_grad = 2*(z - Y[i]) * self.output_weights[j]
                         w_grad = np.dot(w_grad, X[i,k])
                         first = np.dot(X[i], self.hidden_weights[:,j]) + self.hidden_bias[j]
-                        w_grad = np.dot(w_grad, sigmoid_derivative(first))
+                        w_grad = w_grad * sigmoid_derivative(first)
                         wij_grad[k,j] = w_grad
 
                 
@@ -244,10 +247,10 @@ class TwoLayerNN:
         :return A 1D Numpy array with one element for each row in X containing the predicted value.
         '''
         #TODO
-        first = np.dot(X, self.hidden_weights) + self.hidden_bias
-        first = sigmoid(first)
-        second = np.dot(first, self.output_weights) + self.output_bias
-        return second
+        h = np.dot(X, self.hidden_weights) + self.hidden_bias
+        h = sigmoid(h)
+        z = np.dot(h, self.output_weights) + self.output_bias
+        return z
 
     def loss(self, X, Y):
         '''
