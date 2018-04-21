@@ -13,7 +13,7 @@ def l2_loss(Y, predictions):
     # norm = np.linalg.norm(Y-predictions)
     # return np.power(norm, 2)
     return np.sum((Y - predictions) ** 2)
-    
+
 
 def sigmoid(x):
     '''
@@ -53,7 +53,6 @@ class LinearRegression:
         :return None
         '''
         self.weights = np.dot(np.dot(np.linalg.inv(np.dot(np.transpose(X), X)), np.transpose(X)),Y)
-        print(self.weights.shape)
 
     def predict(self, X):
         '''
@@ -194,12 +193,13 @@ class TwoLayerNN:
         :return None
         '''
         #TODO
-        self.hidden_weights = np.zeros((len(X[0]), self.hidden_size))
+        self.hidden_weights = np.random.uniform(0, 1, (len(X[0]), self.hidden_size))
         self.hidden_bias = np.zeros(self.hidden_size)
-        self.output_weights = np.zeros(self.hidden_size)
-        self.output_bias = np.zeros(1)
+        self.output_weights = np.random.uniform(0, 1, (self.hidden_size, self.output_neurons))
+        # self.output_weights = np.zeros((self.hidden_size, self.output_neurons))
+        # self.output_weights = np.random.uniform(0, 1, self.hidden_size)
+        self.output_bias = np.zeros(self.output_neurons)
         for ep in range(epochs):
-            print(ep)
             index = np.arange(len(X))
             np.random.shuffle(index)
             if print_loss:
@@ -207,28 +207,28 @@ class TwoLayerNN:
             for i in index:
 
                 logits = np.dot(X[i], self.hidden_weights) + self.hidden_bias
-                h = sigmoid(logits)
+                h = self.activation(logits)
                 z = np.dot(h, self.output_weights) + self.output_bias
 
-                obias_grad = 2*(z - Y[i])
-
-                vi_grad = np.zeros(self.hidden_size)
+                obias_grad = np.zeros(self.output_neurons)
+                vi_grad = np.zeros((self.hidden_size, self.output_neurons))
                 b1i_grad = np.zeros(self.hidden_size)
                 wij_grad = np.zeros(self.hidden_weights.shape)
+                for p in range (self.output_neurons):
+                    obias_grad[p] = 2*(z[p] - Y[i])
 
-                for j in range(self.hidden_size):
-                    vi_grad[j] = 2* (z - Y[i]) * h[j]
+                    for j in range(self.hidden_size):
+                        vi_grad[j,p] = 2* (z[p] - Y[i]) * h[j]
 
-                    grad = 2* (z - Y[i]) * self.output_weights[j]
-                    grad = grad *sigmoid_derivative(np.dot(X[i], self.hidden_weights[:,j]) + self.hidden_bias[j])
-                    b1i_grad[j] = grad
+                        grad = 2* (z[p] - Y[i]) * self.output_weights[j,p]
+                        grad = grad * self.activation_derivative(np.dot(X[i], self.hidden_weights[:,j]) + self.hidden_bias[j])
+                        b1i_grad[j] = grad
 
-                    for k in range(len(X[0])):
-                        w_grad = 2*(z - Y[i]) * self.output_weights[j]
-                        w_grad = np.dot(w_grad, X[i,k])
-                        first = np.dot(X[i], self.hidden_weights[:,j]) + self.hidden_bias[j]
-                        w_grad = w_grad * sigmoid_derivative(first)
-                        wij_grad[k,j] = w_grad
+                        for k in range(len(X[0])):
+                            w_grad = 2*(z[p] - Y[i]) * self.output_weights[j,p]*X[i,k]
+                            first = np.dot(X[i], self.hidden_weights[:,j]) + self.hidden_bias[j]
+                            w_grad = w_grad * self.activation_derivative(first)
+                            wij_grad[k,j] = w_grad
 
                 
                 # update step
@@ -236,8 +236,6 @@ class TwoLayerNN:
                 self.hidden_bias = self.hidden_bias - learning_rate * b1i_grad
                 self.output_weights = self.output_weights - learning_rate * vi_grad
                 self.output_bias = self.output_bias - learning_rate * obias_grad
-
-
 
     def predict(self, X):
         '''
@@ -261,6 +259,7 @@ class TwoLayerNN:
         :return A float which is the squared error of the model on the dataset
         '''
         predictions = self.predict(X)
+        predictions = predictions.reshape(len(predictions))
         return l2_loss(predictions, Y)
 
     def average_loss(self, X, Y):
