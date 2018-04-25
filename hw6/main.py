@@ -89,7 +89,7 @@ def main():
 
     ##### Fake Data Test ########
     # TODO: Uncomment this to test your EM-algorithm.
-    # fake_dataset_set()
+    fake_dataset_set()
 
 
     ### Run on MNIST #####

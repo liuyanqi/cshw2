@@ -39,7 +39,26 @@ class EMNaiveBayesClassifier:
         '''
         # TODO
 
-        pass
+        unique_Y = np.unique(Y)
+        self.num_unique_Y = len(unique_Y)
+        self.priors = np.zeros(self.num_unique_Y)
+        self.parameters = {}
+
+        self.num_feature = len(X[0])
+        self.num_data = len(X)
+        self.b_jy = np.random.uniform(0, 1, (self.num_unique_Y, self.num_hidden))
+        self.b_ij = np.random.uniform(0, 1, (self.num_unique_Y, self.num_feature, self.num_hidden))
+
+        for idx, y in enumerate(unique_Y):
+            X_ = X[Y == y]
+            self.priors[idx] = float(len(X_))/ len(X)
+
+            bjy, bij = self._em_algorithm(X_, self.num_hidden, max_iters, eps)
+            self.parameters[y] = (bij, bjy)
+            self.b_jy[idx] = bjy
+            self.b_ij[idx] = bij
+
+
 
     def _em_algorithm(self, X, num_hidden, max_iters, eps):
         '''
@@ -53,8 +72,26 @@ class EMNaiveBayesClassifier:
             :return the learned parameters as a tuple (b^ij,b^jy)
         '''
         # TODO
+        bjy = np.random.uniform(0,1, self.num_hidden)
+        bij = np.random.uniform(0,1, (self.num_feature, self.num_hidden))
+        diff = 10000
+        diff2 = 10000
+        itr = 0
 
-        pass
+        while itr < max_iters and (diff > eps and diff2 > eps):
+            print(itr, diff, diff2)
+            itr += 1
+            Q_new = self._e_step(X, self.num_hidden, bjy, bij)
+            bij_new, bjy_new = self._m_step(X, self.num_hidden, Q_new)
+
+            diff = np.absolute(bij_new - bij).max() 
+            diff2 = np.absolute(bjy_new - bjy).max()
+
+            bjy = bjy_new
+            bij = bij_new
+
+        return(bjy, bij)
+
 
     def _e_step(self, X, num_hidden, bjy, bij):
         '''
@@ -68,8 +105,24 @@ class EMNaiveBayesClassifier:
             :return Q(t+1)
         '''
         # TODO
+        Q_new = np.zeros(self.num_hidden)
+        Q_t_new = np.zeros((self.num_data, self.num_hidden))
+        
+        for idx, x in enumerate(X):
+            for j in range(self.num_hidden):
+                temp = 1
+                for i in range(self.num_feature):
+                   temp = temp * np.power(bij[i,j], x[i]) * np.power((1-bij[i,j]), (1-x[i]))
 
-        pass
+                Q_new[j] = bjy[j] * temp
+
+            Q_new = Q_new / np.sum(Q_new)
+            Q_t_new[idx] = Q_new
+
+        return Q_t_new
+
+
+
 
     def _m_step(self, X, num_hidden, probs):
         '''
@@ -83,7 +136,21 @@ class EMNaiveBayesClassifier:
         '''
         # TODO
 
-        pass
+        S_y = len(X)
+        sumation = np.sum(probs, axis=0)
+        b_jy = sumation/S_y
+
+        b_ij = np.zeros((self.num_feature, self.num_hidden))
+
+        for i in range(self.num_feature):
+            sum_ = 0
+            for j in range(len(X)):
+                sum_ += probs[j] * X[j,i]
+
+            b_ij[i] = sum_ / sumation
+
+        return(b_ij, b_jy)
+
 
     def predict(self, X):
         '''
@@ -95,8 +162,25 @@ class EMNaiveBayesClassifier:
         :return A 1D Numpy array where each element contains a prediction 0 or 1.
         '''
         # TODO
+        pre = []
+        print("here")
+        for x in range(X):
+            prediction = np.zeros(self.num_unique_Y)
+            for y in range(self.num_unique_Y):
+                temp2 = 0
+                for j in range(self.num_hidden):
+                    temp =1
+                    for i in range(self.num_feature):
+                        temp = temp * self.b_ij[y, i, j]
 
-        pass
+                    temp2 += self.b_jy[y, j]*temp
+                prediction[y] = temp2
+
+            pre.append(np.argmax(prediction))
+
+        print(pre)
+        return np.array(pre)
+        
 
     def accuracy(self, X, Y):
         '''
