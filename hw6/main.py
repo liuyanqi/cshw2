@@ -89,17 +89,17 @@ def main():
 
     ##### Fake Data Test ########
     # TODO: Uncomment this to test your EM-algorithm.
-    fake_dataset_set()
+    # fake_dataset_set()
 
 
     ### Run on MNIST #####
     # TODO: Uncomment this to run on MNIST
-    # model = EMNaiveBayesClassifier(5)
-    # model.train(data_train.inputs, data_train.labels, max_iters=10)
-    # print('Training Accuracy:', model.accuracy(data_train.inputs, data_train.labels))
-    # print('Testing Accuracy:', model.accuracy(data_test.inputs, data_test.labels))
+    model = EMNaiveBayesClassifier(5)
+    model.train(data_train.inputs, data_train.labels, max_iters=10)
+    print('Training Accuracy:', model.accuracy(data_train.inputs, data_train.labels))
+    print('Testing Accuracy:', model.accuracy(data_test.inputs, data_test.labels))
 
     # TODO: Uncomment to plot the parameters
-    # plot_parameters(model)
+    plot_parameters(model)
 
 main()
