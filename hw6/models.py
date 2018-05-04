@@ -182,34 +182,44 @@ class EMNaiveBayesClassifier:
         '''
         # TODO
         pre = []
-        for x in X:
-            prediction = np.zeros(self.num_unique_Y)
-            for y in range(self.num_unique_Y):
-                temp2 = np.zeros(self.num_hidden)
-                for j in range(self.num_hidden):
+        # for x in X:
+        #     prediction = np.zeros(self.num_unique_Y)
+        #     for y in range(self.num_unique_Y):
+        #         temp2 = np.zeros(self.num_hidden)
+        #         for j in range(self.num_hidden):
 
-                    # bi = self.b_ij[y, j, :]
-                    # bi[bi==0] += 1e-10
-                    # bi[bi==1] -= 1e-10
-                    # # print(bi[bi==1])
-                    # bi = [1 - bi[idx] for idx in range(len(x)) if x[idx]==0]
-                    # temp_log = np.sum(np.log(bi))
-                    # temp_log += np.log(self.b_jy[y,j])
-                    # temp2[j] = temp_log
+        #             # bi = self.b_ij[y, j, :]
+        #             # bi[bi==0] += 1e-10
+        #             # bi[bi==1] -= 1e-10
+        #             # # print(bi[bi==1])
+        #             # bi = [1 - bi[idx] for idx in range(len(x)) if x[idx]==0]
+        #             # temp_log = np.sum(np.log(bi))
+        #             # temp_log += np.log(self.b_jy[y,j])
+        #             # temp2[j] = temp_log
 
-                    temp = 0
-                    for i in range(self.num_feature):
-                        if x[i] == 1:
-                            temp = temp + np.log(self.b_ij[y,j,i])
-                        else:
-                            temp = temp + np.log(1-self.b_ij[y,j,i]) 
-                    temp2[j] =  np.log(self.b_jy[y, j]) + temp
+        #             temp = 0
+        #             for i in range(self.num_feature):
+        #                 if x[i] == 1:
+        #                     temp = temp + np.log(self.b_ij[y,j,i])
+        #                 else:
+        #                     temp = temp + np.log(1-self.b_ij[y,j,i]) 
+        #             temp2[j] =  np.log(self.b_jy[y, j]) + temp
 
-                #compute in log space
-                prediction[y] = np.log(self.priors[y]) + (np.amax(temp2) + np.log(np.sum(np.exp(temp2 - np.amax(temp2)))))
-            pre.append(np.argmax(prediction))
-        return np.array(pre)
-        
+        #         #compute in log space
+        #         prediction[y] = np.log(self.priors[y]) + (np.amax(temp2) + np.log(np.sum(np.exp(temp2 - np.amax(temp2)))))
+        #     pre.append(np.argmax(prediction))
+        # return np.array(pre)
+        prediction = np.zeros((len(X), self.num_unique_Y))
+        for y, dict_ in self.parameters.items():
+            b_ij = dict_['bij']
+            b_jy = dict_['bjy']
+            for i, x in enumerate(X):
+                pre = np.exp(np.sum(np.log(b_ij[:, X[i, :] == 1]), axis=1) +np.sum(np.log(1 - b_ij[:, X[i, :] == 0]), axis=1) + b_jy)
+                pre = np.sum(pre) * self.priors[y]
+                prediction[i][y] = pre
+
+        return np.argmax(prediction, axis=1)
+
 
     def accuracy(self, X, Y):
         '''
