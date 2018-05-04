@@ -90,7 +90,6 @@ class EMNaiveBayesClassifier:
             bjy = bjy_new
             bij = bij_new
 
-            print(itr, diff, diff2)
             itr += 1
 
         return(bjy, bij)

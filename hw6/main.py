@@ -89,7 +89,7 @@ def main():
 
     ##### Fake Data Test ########
     # TODO: Uncomment this to test your EM-algorithm.
-    # fake_dataset_set()
+    fake_dataset_set()
 
 
     ### Run on MNIST #####
@@ -100,6 +100,6 @@ def main():
     print('Testing Accuracy:', model.accuracy(data_test.inputs, data_test.labels))
 
     # TODO: Uncomment to plot the parameters
-    plot_parameters(model)
+    # plot_parameters(model)
 
 main()
